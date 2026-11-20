@@ -1,0 +1,29 @@
+{
+  "stages": [
+    {
+      "id": "scope",
+      "name": "Scope analysis",
+      "description": "Find out with the user what the result must be and how to get there: goal, done criteria, constraints, interfaces, environment, non-goals, risks. Write PLAN.md, create most of the areas and topics, and one meta task per major deliverable. Ask the open questions. No implementation.",
+      "rules": {
+        "task_kinds": [
+          "meta"
+        ],
+        "start_work": false
+      }
+    },
+    {
+      "id": "build",
+      "name": "Implementation",
+      "description": "Split the meta tasks into work tasks and implement them one by one: verify, report, done and commit with the user's permission.",
+      "rules": {
+        "task_kinds": [
+          "work",
+          "meta"
+        ],
+        "start_work": true
+      }
+    }
+  ],
+  "current": "scope",
+  "history": []
+}

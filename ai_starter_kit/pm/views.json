@@ -1,0 +1,141 @@
+{
+  "agent_note": "AGENT: This file is generated for the user to read. Do not read, parse or edit it: use python3 pm/pm.py list|json and python3 pm/question.py open|show.",
+  "files": {
+    "TODO.md": {
+      "title": "TODO",
+      "intro": [
+        "Decided tasks that are not started yet, by area and topic. **Next up** lists the first ready tasks in priority order.",
+        "Status: **ready** = can start, **waiting** = waits for your answer to a question, **blocked** = waits for another task."
+      ]
+    },
+    "WIP.md": {
+      "title": "Work in progress",
+      "intro": [
+        "Tasks being worked on now. The last dated **Status** line of each task says where the work stands."
+      ]
+    },
+    "DONE.md": {
+      "title": "Done",
+      "intro": [
+        "Finished tasks, each with its **Result** (what was verified and how) and any **Not done** scope."
+      ]
+    },
+    "BACKLOG.md": {
+      "title": "Backlog",
+      "intro": [
+        "Ideas and later improvements that are not decided yet. Tell the agent which ones to move to TODO."
+      ]
+    },
+    "DROPPED.md": {
+      "title": "Dropped",
+      "intro": [
+        "Rejected or obsolete tasks, kept with the reason so the history survives."
+      ]
+    },
+    "ALL_TASKS.md": {
+      "title": "All tasks",
+      "intro": [
+        "Every task in every state, by area (N) and topic (N.M); N.0 holds tasks that concern a whole area. Within a topic: in progress first, then todo, backlog, done and dropped."
+      ]
+    },
+    "QUESTIONS_OPEN.md": {
+      "title": "Open questions",
+      "intro": [
+        "Questions waiting for your answer, oldest first. Answer by ID and option, e.g. \"Q-0012: a\" or \"Q-0012: b, but ...\". The recommended option is listed first."
+      ]
+    },
+    "QUESTIONS_CLOSED.md": {
+      "title": "Answered questions",
+      "intro": [
+        "Answered questions, newest first, with every answer and its time."
+      ]
+    },
+    "SPEC.md": {
+      "title": "Specification",
+      "intro": [
+        "The requirements of the project. **Committed** requirements are agreed and locked: they change only through a change request (ECR) that you approve. **Draft** requirements may still change.",
+        "Open change requests are listed at the end with the tasks they affect."
+      ]
+    }
+  },
+  "labels": {
+    "next_up": "Next up",
+    "no_ready_task": "No ready task.",
+    "nothing_here": "Nothing here.",
+    "no_tasks": "No tasks.",
+    "no_tasks_no_areas": "No tasks and no areas yet.",
+    "ungrouped": "Ungrouped",
+    "area_wide": "area-wide",
+    "context": "Context",
+    "phase": "Phase",
+    "depends_on": "Depends on",
+    "none": "none",
+    "waits_for": "Waits for",
+    "answered_questions": "Answered questions",
+    "see": "see",
+    "also_needs": "Also needs (not tracked)",
+    "needed_by": "Needed by",
+    "summary": "Summary",
+    "summary_caption": "Counts of todo and in-progress tasks by status, then backlog, done and dropped.",
+    "area_topic": "Area / topic",
+    "backlog": "backlog",
+    "all": "All",
+    "recommended": "recommended",
+    "tasks": "Tasks",
+    "answer": "Answer",
+    "meta_task": "Meta task (done when the tasks it depends on are done)",
+    "superseded_by": "Superseded by",
+    "workflow_stage": "Workflow stage",
+    "waiting_items": "Also waiting for you (asked in chat)",
+    "implements": "Implements",
+    "spec_committed": "Committed requirements",
+    "spec_draft": "Draft requirements (may still change)",
+    "spec_retired": "Retired requirements",
+    "ecr_heading": "Change requests (ECR)",
+    "ecr_actions": "Changes",
+    "ecr_impact": "Affected tasks",
+    "version": "version",
+    "source": "Source",
+    "refines": "Refines",
+    "suspect": "Suspect: a requirement it refines has changed; to be reviewed",
+    "spec_sealed": "Sealed requirements (only the user changes them, by hand)"
+  },
+  "status": {
+    "ready": "ready",
+    "waiting": "waiting",
+    "blocked": "blocked",
+    "in progress": "in progress",
+    "done": "done",
+    "dropped": "dropped",
+    "backlog": "backlog"
+  },
+  "task_template": [
+    "- **Created:** {now}",
+    "- **Requested by the user:** \"{request}\"",
+    "- **Description:** {description}",
+    "- **Done when:** {done_when}"
+  ],
+  "note_labels": {
+    "status": "Status",
+    "decision": "Decision",
+    "result": "Result",
+    "not_done": "Not done",
+    "correction": "Correction",
+    "note": "Note",
+    "started": "Started",
+    "done": "Done",
+    "dropped": "Dropped",
+    "moved": "Moved",
+    "superseded": "Superseded"
+  },
+  "status_colors": {
+    "ready": "blue",
+    "waiting": "orange",
+    "blocked": "red",
+    "in progress": "purple",
+    "done": "green",
+    "dropped": "gray",
+    "backlog": "gray"
+  },
+  "color_style": "latex"
+}

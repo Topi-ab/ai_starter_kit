@@ -1,0 +1,18 @@
+{
+  "code": {
+    "language": "English",
+    "covers": "Comments, identifiers (variable, function, file names), log and error messages, commit messages."
+  },
+  "docs": {
+    "language": "English",
+    "covers": "Documentation in the repository: README, design notes, docstrings rendered as docs (md, rst, ...)."
+  },
+  "task_files": {
+    "language": "English",
+    "covers": "Task titles and task.md, questions and options, PLAN.md, JOURNAL.md, and the texts in pm/views.json (so the generated TODO.md etc. read in this language)."
+  },
+  "chat": {
+    "language": "English",
+    "covers": "The agent's replies to the user in the conversation."
+  }
+}

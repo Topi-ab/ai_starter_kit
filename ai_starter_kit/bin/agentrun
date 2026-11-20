@@ -1,0 +1,97 @@
+#!/bin/bash
+# agentrun: run a job in the background and wait for it while watching an inbox file.
+#
+#   agentrun <inbox> start [-t SECS] [-n LINES] -- <command...>
+#   agentrun <inbox> wait  [-t SECS] [-n LINES] <id>
+#   agentrun <inbox> kill  <id>
+#   agentrun <inbox> list
+#
+# start: runs <command> (via bash -c) in its own process group, output to a log, and waits.
+# The wait polls once per second and returns as soon as one of these happens:
+#   - the job finished:    prints "JOB <id> DONE rc=<rc>", the last LINES log lines, exit = rc
+#   - the inbox changed:   prints "INBOX CHANGED", the new inbox content and
+#                          "JOB <id> STILL RUNNING", exit 100. The job keeps running.
+#   - the wait limit hit:  prints "JOB <id> STILL RUNNING (wait limit)", exit 101.
+# "Changed" is relative to the inbox content last shown to the agent (stored in
+# jobs/<name>/seen): a message that arrived between two calls is reported at once by the
+# next call. With no seen state yet, an inbox containing "## MSG" counts as changed. Continue waiting with "wait <id>", stop with "kill <id>"
+# (kills the whole process group). Default wait limit 540 s (below the 10 min tool limit).
+# Job state lives next to the inbox: <inbox dir>/jobs/<inbox name>/<id>/{cmd,log,rc,pgid}.
+set -u
+inbox=${1:?inbox file}; action=${2:?start|wait|kill|list}; shift 2
+limit=540; lines=60
+base="$(dirname "$inbox")/jobs/$(basename "$inbox" .md)"
+mkdir -p "$base"
+
+sig() { if [ -e "$inbox" ]; then md5sum "$inbox" | cut -d' ' -f1; else echo none; fi; }
+seen_file="$base/seen"
+seen() { if [ -f "$seen_file" ]; then cat "$seen_file"; elif grep -q '^## MSG' "$inbox" 2>/dev/null; then echo unseen; else sig; fi; }
+mark_seen() { sig > "$seen_file.tmp" && mv "$seen_file.tmp" "$seen_file"; }
+
+opts() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -t) limit=$2; shift 2 ;;
+            -n) lines=$2; shift 2 ;;
+            --) shift; rest=("$@"); return ;;
+            *) rest=("$@"); return ;;
+        esac
+    done
+    rest=()
+}
+
+wait_job() {   # $1 = id
+    local id=$1 d="$base/$1" s0 t0
+    [ -d "$d" ] || { echo "agentrun: no job $id" >&2; exit 2; }
+    s0=$(seen); t0=$SECONDS
+    while :; do
+        if [ -f "$d/rc" ]; then
+            local rc; rc=$(cat "$d/rc")
+            echo "JOB $id DONE rc=$rc (log: $d/log, last $lines lines below)"
+            tail -n "$lines" "$d/log"
+            exit "$rc"
+        fi
+        if [ "$(sig)" != "$s0" ]; then
+            echo "INBOX CHANGED ($inbox):"
+            cat "$inbox" 2>/dev/null
+            mark_seen
+            echo "JOB $id STILL RUNNING (log: $d/log). Continue: agentrun $inbox wait $id   Stop: agentrun $inbox kill $id"
+            exit 100
+        fi
+        if [ $((SECONDS - t0)) -ge "$limit" ]; then
+            echo "JOB $id STILL RUNNING (wait limit ${limit}s; log: $d/log). Continue: agentrun $inbox wait $id"
+            tail -n 5 "$d/log"
+            exit 101
+        fi
+        sleep 1
+    done
+}
+
+case "$action" in
+    start)
+        opts "$@"; [ ${#rest[@]} -gt 0 ] || { echo "agentrun: no command" >&2; exit 2; }
+        id=$(date +%H%M%S)-$$
+        d="$base/$id"; mkdir -p "$d"
+        printf '%s\n' "${rest[*]}" > "$d/cmd"
+        # Own process group (setsid); the wrapper writes rc when the command ends.
+        setsid bash -c 'bash -c "$1" > "$2/log" 2>&1; echo $? > "$2/rc.tmp"; mv "$2/rc.tmp" "$2/rc"' \
+            _ "${rest[*]}" "$d" < /dev/null > /dev/null 2>&1 &
+        echo $! > "$d/pgid"
+        echo "JOB $id STARTED: ${rest[*]}"
+        wait_job "$id" ;;
+    wait)
+        opts "$@"; [ ${#rest[@]} -eq 1 ] || { echo "agentrun: wait <id>" >&2; exit 2; }
+        wait_job "${rest[0]}" ;;
+    kill)
+        id=${1:?id}; d="$base/$id"
+        [ -f "$d/pgid" ] || { echo "agentrun: no job $id" >&2; exit 2; }
+        pg=$(cat "$d/pgid")
+        if [ -f "$d/rc" ]; then echo "JOB $id already done rc=$(cat "$d/rc")"; exit 0; fi
+        kill -TERM -- "-$pg" 2>/dev/null; sleep 2; kill -KILL -- "-$pg" 2>/dev/null
+        echo 143 > "$d/rc"; echo "JOB $id KILLED (process group $pg)" ;;
+    list)
+        for d in "$base"/*/; do [ -d "$d" ] || continue; id=$(basename "$d")
+            st=running; [ -f "$d/rc" ] && st="done rc=$(cat "$d/rc")"
+            echo "$id  $st  $(cat "$d/cmd")"; done ;;
+    *) echo "agentrun: unknown action $action" >&2; exit 2 ;;
+esac
